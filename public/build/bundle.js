@@ -27,6 +27,9 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function append(target, node) {
+        target.appendChild(node);
+    }
     function insert(target, node, anchor) {
         target.insertBefore(node, anchor || null);
     }
@@ -287,6 +290,10 @@ var app = (function () {
     function dispatch_dev(type, detail) {
         document.dispatchEvent(custom_event(type, Object.assign({ version: '3.46.3' }, detail), true));
     }
+    function append_dev(target, node) {
+        dispatch_dev('SvelteDOMInsert', { target, node });
+        append(target, node);
+    }
     function insert_dev(target, node, anchor) {
         dispatch_dev('SvelteDOMInsert', { target, node, anchor });
         insert(target, node, anchor);
@@ -334,7 +341,7 @@ var app = (function () {
      * Copyright 2019 Google LLC
      * SPDX-License-Identifier: BSD-3-Clause
      */
-    const t$1=window.ShadowRoot&&(void 0===window.ShadyCSS||window.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,e$2=Symbol(),n$3=new Map;class s$3{constructor(t,n){if(this._$cssResult$=!0,n!==e$2)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t;}get styleSheet(){let e=n$3.get(this.cssText);return t$1&&void 0===e&&(n$3.set(this.cssText,e=new CSSStyleSheet),e.replaceSync(this.cssText)),e}toString(){return this.cssText}}const o$3=t=>new s$3("string"==typeof t?t:t+"",e$2),i$1=(e,n)=>{t$1?e.adoptedStyleSheets=n.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet)):n.forEach((t=>{const n=document.createElement("style"),s=window.litNonce;void 0!==s&&n.setAttribute("nonce",s),n.textContent=t.cssText,e.appendChild(n);}));},S$1=t$1?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const n of t.cssRules)e+=n.cssText;return o$3(e)})(t):t;
+    const t$1=window.ShadowRoot&&(void 0===window.ShadyCSS||window.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,e$2=Symbol(),n$3=new Map;class s$3{constructor(t,n){if(this._$cssResult$=!0,n!==e$2)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=t;}get styleSheet(){let e=n$3.get(this.cssText);return t$1&&void 0===e&&(n$3.set(this.cssText,e=new CSSStyleSheet),e.replaceSync(this.cssText)),e}toString(){return this.cssText}}const o$3=t=>new s$3("string"==typeof t?t:t+"",e$2),r$2=(t,...n)=>{const o=1===t.length?t[0]:n.reduce(((e,n,s)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(n)+t[s+1]),t[0]);return new s$3(o,e$2)},i$1=(e,n)=>{t$1?e.adoptedStyleSheets=n.map((t=>t instanceof CSSStyleSheet?t:t.styleSheet)):n.forEach((t=>{const n=document.createElement("style"),s=window.litNonce;void 0!==s&&n.setAttribute("nonce",s),n.textContent=t.cssText,e.appendChild(n);}));},S$1=t$1?t=>t:t=>t instanceof CSSStyleSheet?(t=>{let e="";for(const n of t.cssRules)e+=n.cssText;return o$3(e)})(t):t;
 
     /**
      * @license
@@ -356,23 +363,42 @@ var app = (function () {
      */var l,o;class s extends a$1{constructor(){super(...arguments),this.renderOptions={host:this},this._$Dt=void 0;}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&void 0!==t||(e.renderBefore=i.firstChild),i}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Dt=x(i,this.renderRoot,this.renderOptions);}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Dt)||void 0===t||t.setConnected(!0);}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Dt)||void 0===t||t.setConnected(!1);}render(){return b}}s.finalized=!0,s._$litElement$=!0,null===(l=globalThis.litElementHydrateSupport)||void 0===l||l.call(globalThis,{LitElement:s});const n=globalThis.litElementPolyfillSupport;null==n||n({LitElement:s});(null!==(o=globalThis.litElementVersions)&&void 0!==o?o:globalThis.litElementVersions=[]).push("3.1.2");
 
     class PizzaView extends s {
-    	static get properties() {
-    		return {
-    			size: {
-    				type: String
-    			}
-    		};
-    	}
+    	static styles = r$2`
+		.pizza {
+			z-index: 1;
+			transform: translateX(50%) translateX(-210px) translateY(10%);
+		}
 
-    	createRenderRoot() {
-        return this; // turn off shadow dom to access external styles
-      }
+		.board {
+			background: url("/images/board.svg") no-repeat 0 20px;
+			background-size: contain;
+			width: 400px;
+			height: 274px;
+			position: absolute;
+			z-index: 1;
+			top: 30px;
+			left: 0;
+		}
+
+		.base {
+			background: url("/images/base.svg") no-repeat;
+			background-size: contain;
+			width: 312px;
+			height: 258px;
+			position: absolute;
+			left: 70px;
+			top: 35px;
+			z-index: 2;
+		}
+  `;
 
     	render() {
     		return $`
-		<h1 class="text-3xl font-bold underline bg-blue-500">
-			Hello world!
-		</h1>	
+			<div class="pizza">
+				<div class="base"></div>
+				<div class="board"></div>
+			</div>
+			
 		`;
     	}
     }
@@ -391,45 +417,38 @@ var app = (function () {
     const file = "src/App.svelte";
 
     function create_fragment(ctx) {
+    	let div;
     	let pizza_view;
-    	let t0;
+    	let t;
     	let pizza_configurator;
-    	let t1;
-    	let h1;
 
     	const block = {
     		c: function create() {
+    			div = element("div");
     			pizza_view = element("pizza-view");
-    			t0 = space();
+    			t = space();
     			pizza_configurator = element("pizza-configurator");
-    			t1 = space();
-    			h1 = element("h1");
-    			h1.textContent = "Hello world!";
-    			set_custom_element_data(pizza_view, "size", "awesome");
-    			add_location(pizza_view, file, 14, 0, 533);
-    			add_location(pizza_configurator, file, 15, 0, 574);
-    			attr_dev(h1, "class", "text-3xl font-bold underline bg-blue-500");
-    			add_location(h1, file, 16, 0, 616);
+    			set_custom_element_data(pizza_view, "class", "w-5/12 h-screen");
+    			add_location(pizza_view, file, 15, 1, 562);
+    			set_custom_element_data(pizza_configurator, "class", "w-7/12 h-screen");
+    			add_location(pizza_configurator, file, 16, 1, 613);
+    			attr_dev(div, "class", "flex flex-row");
+    			add_location(div, file, 14, 0, 533);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, pizza_view, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, pizza_configurator, anchor);
-    			insert_dev(target, t1, anchor);
-    			insert_dev(target, h1, anchor);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, pizza_view);
+    			append_dev(div, t);
+    			append_dev(div, pizza_configurator);
     		},
     		p: noop,
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(pizza_view);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(pizza_configurator);
-    			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(h1);
+    			if (detaching) detach_dev(div);
     		}
     	};
 

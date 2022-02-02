@@ -12,8 +12,8 @@
 	import './components/configurator/configurator';
 </script>
 
-<pizza-view size="awesome"></pizza-view>
-<pizza-configurator></pizza-configurator>
-<h1 class="text-3xl font-bold underline bg-blue-500">
-	Hello world!
-</h1>
+<div class="flex flex-row">
+	<pizza-view class="w-5/12 h-screen"></pizza-view>
+	<pizza-configurator class="w-7/12 h-screen"></pizza-configurator>
+</div>
+

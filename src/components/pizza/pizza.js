@@ -1,23 +1,42 @@
 import { html, css, LitElement } from 'lit';
 
 export class PizzaView extends LitElement {
-	static get properties() {
-		return {
-			size: {
-				type: String
-			}
-		};
-	}
+	static styles = css`
+		.pizza {
+			z-index: 1;
+			transform: translateX(50%) translateX(-210px) translateY(10%);
+		}
 
-	createRenderRoot() {
-    return this; // turn off shadow dom to access external styles
-  }
+		.board {
+			background: url("/images/board.svg") no-repeat 0 20px;
+			background-size: contain;
+			width: 400px;
+			height: 274px;
+			position: absolute;
+			z-index: 1;
+			top: 30px;
+			left: 0;
+		}
+
+		.base {
+			background: url("/images/base.svg") no-repeat;
+			background-size: contain;
+			width: 312px;
+			height: 258px;
+			position: absolute;
+			left: 70px;
+			top: 35px;
+			z-index: 2;
+		}
+  `;
 
 	render() {
 		return html`
-		<h1 class="text-3xl font-bold underline bg-blue-500">
-			Hello world!
-		</h1>	
+			<div class="pizza">
+				<div class="base"></div>
+				<div class="board"></div>
+			</div>
+			
 		`;
 	}
 }
