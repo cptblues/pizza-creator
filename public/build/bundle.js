@@ -363,10 +363,51 @@ var app = (function () {
      */var l,o;class s extends a$1{constructor(){super(...arguments),this.renderOptions={host:this},this._$Dt=void 0;}createRenderRoot(){var t,e;const i=super.createRenderRoot();return null!==(t=(e=this.renderOptions).renderBefore)&&void 0!==t||(e.renderBefore=i.firstChild),i}update(t){const i=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(t),this._$Dt=x(i,this.renderRoot,this.renderOptions);}connectedCallback(){var t;super.connectedCallback(),null===(t=this._$Dt)||void 0===t||t.setConnected(!0);}disconnectedCallback(){var t;super.disconnectedCallback(),null===(t=this._$Dt)||void 0===t||t.setConnected(!1);}render(){return b}}s.finalized=!0,s._$litElement$=!0,null===(l=globalThis.litElementHydrateSupport)||void 0===l||l.call(globalThis,{LitElement:s});const n=globalThis.litElementPolyfillSupport;null==n||n({LitElement:s});(null!==(o=globalThis.litElementVersions)&&void 0!==o?o:globalThis.litElementVersions=[]).push("3.1.2");
 
     class PizzaView extends s {
+    	static properties = {
+        active: {type: Boolean, reflect: true},
+    		activePizza: {type: Boolean},
+      };
+
+    	attributeChangedCallback(name, oldVal, newVal) {
+    		if (name === 'active') {
+    			this.addPizzaLayer();
+    		}
+      }
+
+    	addPizzaLayer() {
+    		setTimeout(() => {
+    			this.activePizza = true;
+    		}, 1500);
+    	}
+
+    	constructor() {
+    		super();
+    		this.active = false;
+    		this.activePizza = false;
+    	}
+
     	static styles = r$2`
+		@keyframes move-plate {
+			from {
+				transform: translateX(0px);
+			}
+			to {
+				transform: translateX(50%) translateY(10%);
+			}
+		}
+
+		@keyframes move-pizza {
+			from {
+				transform: translateY(-100px);
+			}
+			to {
+				transform: translateY(10%);
+			}
+		}
+
 		.pizza {
 			z-index: 1;
-			transform: translateX(50%) translateX(-210px) translateY(10%);
+			transform: translateX(50%) translateY(10%);
 		}
 
 		.board {
@@ -389,13 +430,28 @@ var app = (function () {
 			left: 70px;
 			top: 35px;
 			z-index: 2;
+			display: none;
+			transform: translateY(-100px);
+		}
+
+		.active {
+			animation: move-plate;
+  		animation-duration: 2s;
+		}
+
+		.active-pizza {
+			display: block;
+			animation: move-pizza;
+  		animation-duration: 2s;
+			animation-delay: 2s;
 		}
   `;
 
     	render() {
     		return $`
-			<div class="pizza">
-				<div class="base"></div>
+		${this.activePizza}
+			<div class="pizza ${this.active ? 'active' : ''}">
+				<div class="base ${this.activePizza ? 'active-pizza' : ''}"></div>
 				<div class="board"></div>
 			</div>
 			
@@ -428,12 +484,13 @@ var app = (function () {
     			pizza_view = element("pizza-view");
     			t = space();
     			pizza_configurator = element("pizza-configurator");
+    			set_custom_element_data(pizza_view, "active", /*pizzaViewActive*/ ctx[0]);
     			set_custom_element_data(pizza_view, "class", "w-5/12 h-screen");
-    			add_location(pizza_view, file, 15, 1, 562);
+    			add_location(pizza_view, file, 17, 1, 658);
     			set_custom_element_data(pizza_configurator, "class", "w-7/12 h-screen");
-    			add_location(pizza_configurator, file, 16, 1, 613);
+    			add_location(pizza_configurator, file, 18, 1, 736);
     			attr_dev(div, "class", "flex flex-row");
-    			add_location(div, file, 14, 0, 533);
+    			add_location(div, file, 16, 0, 629);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -444,7 +501,11 @@ var app = (function () {
     			append_dev(div, t);
     			append_dev(div, pizza_configurator);
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*pizzaViewActive*/ 1) {
+    				set_custom_element_data(pizza_view, "active", /*pizzaViewActive*/ ctx[0]);
+    			}
+    		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
@@ -474,14 +535,32 @@ var app = (function () {
     		}
     	};
 
+    	let pizzaViewActive = false;
+
+    	setTimeout(
+    		() => {
+    			$$invalidate(0, pizzaViewActive = true);
+    		},
+    		500
+    	);
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<App> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ oldRegister });
-    	return [];
+    	$$self.$capture_state = () => ({ oldRegister, pizzaViewActive });
+
+    	$$self.$inject_state = $$props => {
+    		if ('pizzaViewActive' in $$props) $$invalidate(0, pizzaViewActive = $$props.pizzaViewActive);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [pizzaViewActive];
     }
 
     class App extends SvelteComponentDev {
@@ -499,7 +578,7 @@ var app = (function () {
     }
 
     var app = new App({
-    	target: document.body
+        target: document.body
     });
 
     return app;
